@@ -223,7 +223,7 @@
             <option value="chart,doughnut">插入环形图</option>
             <option value="chart,line">插入折线图</option>
         </select>
-        <a id="pptDownload" href="javascript:downloadPptx()">渲染pptx并下载</a>
+        <a id="pptDownload" href="javascript:downloadPptx()">下载PPT</a>
         <div id="right_container" style="padding-top: 8px;">
             <!--<canvas id="right_canvas" width="1920" height="1080" style="width: 960px;height: 540px;"></canvas>-->
             <svg id="right_canvas"></svg>
@@ -242,8 +242,8 @@
 <script src="static/marked.js"></script>
 <script>
     const baseUrl = 'https://kfcv50.link/docmee/v1'; // 新增baseUrl变量
-    let apiKey = 'sk-XRxoiUHyUQYhhl8kD4272199Fb644e498895F3A58dD50a5b'; // 新增apiKey变量
-    const authorization = 'Bearer sk-XRxoiUHyUQYhhl8kD4272199Fb644e498895F3A58dD50a5b'; // 新增authorization变量
+    let apiKey = 'sk-fVTVefKInF0y5AKJE053D565D58743889975891714Eb2cD2'; // 新增apiKey变量
+    const authorization = 'Bearer sk-fVTVefKInF0y5AKJE053D565D58743889975891714Eb2cD2'; // 新增authorization变量
     var pptxId = null
     var outline = ''
     var templateId = ''
@@ -295,10 +295,50 @@
             console.error(`创建接口 token 异常：${error.message}`);
         }
     }
+    function downloadPptx() {
+        if (!pptxId) {
+            alert('PPT ID不存在，无法下载');
+            return;
+        }
+        const url = `${baseUrl}/api/ppt/downloadPptx`;
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('token', apiKey);
+        xhr.setRequestHeader('Authorization', authorization);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (this.status === 200) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.code === 0 && response.data && response.data.fileUrl) {
+                    const fileUrl = response.data.fileUrl;
+                    const fileName = response.data.subject ? response.data.subject + '.pptx' : 'presentation.pptx';
+
+                    // 创建一个隐藏的 <a> 元素来触发下载
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = fileUrl;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    alert('获取下载链接失败：' + (response.message || '未知错误'));
+                }
+            } else {
+                alert('下载请求失败：' + xhr.statusText);
+            }
+        };
+        xhr.onerror = function(e) {
+            console.error('下载出错', e);
+            alert('下载出错');
+        };
+        xhr.send(JSON.stringify({ id: pptxId }));
+    }
 
 
     // 页面加载时调用createApiToken
     window.onload = createApiToken;
+
 
     function generateOutline() {
         outline = ''
@@ -551,46 +591,6 @@
         let current = document.getElementById('img_' + idx)
         current.classList.add('item_select')
         painter.drawPptx(pptxObj, idx)
-    }
-
-    function downloadPptx() {
-        let download = document.getElementById('pptDownload')
-        // 渲染pptx并下载
-        if (download.innerText.indexOf('下载') == -1) {
-            return
-        }
-        download.innerText = '正在渲染中...'
-        let xhr = new XMLHttpRequest()
-        xhr.responseType = 'blob'
-        xhr.open('POST', `${baseUrl}/api/ppt/json2ppt?apiKey=${apiKey}`)
-        xhr.setRequestHeader('token', apiKey)
-        xhr.setRequestHeader('Authorization', authorization)
-        xhr.setRequestHeader('Content-Type', 'application/json')
-        xhr.onload = function () {
-            if (this.status == 200) {
-                download.innerText = '渲染pptx并下载'
-                let blob = this.response
-                if (blob.type == 'application/json') {
-                    const reader = new FileReader()
-                    reader.onload = function (e) {
-                        let json = JSON.parse(e.target.result)
-                        alert('下载失败：' + json.message)
-                    }
-                    reader.readAsText(blob)
-                    return
-                }
-                let a = document.createElement('a')
-                a.href = window.URL.createObjectURL(blob)
-                let name = 'download'
-                a.download = name + '.pptx'
-                a.click()
-            }
-        }
-        xhr.onerror = function (e) {
-            console.error(e)
-            download.innerText = '渲染pptx并下载'
-        }
-        xhr.send(JSON.stringify(pptxObj))
     }
 
     async function calcSubjectColor(src) {

@@ -84,8 +84,8 @@
 <script src="static/element.js"></script>
 <script>
     const baseUrl = 'https://kfcv50.link/docmee/v1'; // 新增baseUrl变量
-    let apiKey = 'sk-XRxoiUHyUQYhhl8kD4272199Fb644e498895F3A58dD50a5b'; // 新增apiKey变量
-    const authorization = 'Bearer sk-XRxoiUHyUQYhhl8kD4272199Fb644e498895F3A58dD50a5b'; // 新增authorization变量
+    let apiKey = 'sk-fVTVefKInF0y5AKJE053D565D58743889975891714Eb2cD2'; // 新增apiKey变量
+    const authorization = 'Bearer sk-fVTVefKInF0y5AKJE053D565D58743889975891714Eb2cD2'; // 新增authorization变量
     var editor = new JSONEditor(document.querySelector('#json'), {}, {})
 
     var pptxObj = null
@@ -187,7 +187,7 @@
         download_pptx.innerText = '正在渲染中...'
         let xhr = new XMLHttpRequest()
         xhr.responseType = 'blob'
-        xhr.open('POST', `${baseUrl}/api/ppt/json2ppt?apiKey=${apiKey}`)
+        xhr.open('POST', `${baseUrl}/api/pptjson/json2ppt?apiKey=${apiKey}`)
         xhr.setRequestHeader('Content-Type', 'application/json')
         xhr.setRequestHeader('token', apiKey)
         xhr.setRequestHeader('authorization', authorization)
